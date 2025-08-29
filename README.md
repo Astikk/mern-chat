@@ -24,3 +24,5 @@ Built a **real-time chat application** using a WebSocket server for seamless com
 - Chat in real-time with connected users 💬  
 - Upload and share files in chat 📁  
 - Frontend accesses uploaded files via `/uploads/<filename>` URL 🌐
+
+<img width="1919" height="913" alt="chat" src="https://github.com/user-attachments/assets/030bee3c-811b-4815-bbe6-3b1046f78b74" />
