@@ -56,7 +56,7 @@ export default function Chat() {
         ws.send(JSON.stringify({
             recipient: selectedUserId,
             text: newMessageText,
-            file
+            file,
         }))
         setNewMessageText('');
         setMessages(prev => ([...prev, {
@@ -65,6 +65,12 @@ export default function Chat() {
             recipient: selectedUserId,
             _id: Date.now(),
         }]))
+        if(file) {
+            axios.get('/messages/'+selectedUserId).then((res) => {
+                const {data} = res;
+                setMessages(data)
+            });
+        }
     }
     function sendFile(ev) {
         const reader = new FileReader()
@@ -162,6 +168,16 @@ export default function Chat() {
                                 <div key={msg._id} className={(msg.sender === id ? 'text-right': 'text-left')}>
                                     <div className={"text-left inline-block p-2 my-2 rounded-md text-sm "+ (msg.sender === id ? 'bg-blue-500 text-white mr-2' : 'bg-white text-gray-400')}>
                                         {msg.text}
+                                        {msg.file && (
+                                            <div className="">
+                                                <a target="_blank" className="flex items-center gap-1 border-b" href={axios.defaults.baseURL + '/uploads/' + msg.file}>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+                                                        <path fillRule="evenodd" d="M19.902 4.098a3.75 3.75 0 0 0-5.304 0l-4.5 4.5a3.75 3.75 0 0 0 1.035 6.037.75.75 0 0 1-.646 1.353 5.25 5.25 0 0 1-1.449-8.45l4.5-4.5a5.25 5.25 0 1 1 7.424 7.424l-1.757 1.757a.75.75 0 1 1-1.06-1.06l1.757-1.757a3.75 3.75 0 0 0 0-5.304Zm-7.389 4.267a.75.75 0 0 1 1-.353 5.25 5.25 0 0 1 1.449 8.45l-4.5 4.5a5.25 5.25 0 1 1-7.424-7.424l1.757-1.757a.75.75 0 1 1 1.06 1.06l-1.757 1.757a3.75 3.75 0 1 0 5.304 5.304l4.5-4.5a3.75 3.75 0 0 0-1.035-6.037.75.75 0 0 1-.354-1Z" clipRule="evenodd" />
+                                                    </svg>
+                                                    {msg.file}
+                                                </a>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

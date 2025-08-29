@@ -1,3 +1,4 @@
 /api/node_modules/
 /api/.env
+/api/uploads/
 /my-project/node_modules

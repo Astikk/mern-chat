@@ -21,6 +21,7 @@ const jwtSecret = process.env.JWT_SECRET;
 const bcryptSalt = bcrypt.genSaltSync(10);
 
 const app = express();
+app.use("/uploads", express.static(__dirname + "/uploads"));
 app.use(express.json());
 
 app.use(cookieParser());
@@ -195,22 +196,31 @@ wss.on("connection", (connection, req) => {
   connection.on("message", async (message) => {
     const messageData = JSON.parse(message.toString());
     const { recipient, text, file } = messageData;
+    let filename = null;
     if (file) {
       const parts = file.name.split(".");
       const ext = parts[parts.length - 1];
-      const filename = Date.now() + "." + ext;
+      filename = Date.now() + "." + ext;
       const path = __dirname + "/uploads/" + filename;
-      const bufferData = Buffer.from(file.data, "base64");
-      fs.writeFile(path);
-      console.log(file, bufferData, () => {
-        console.log("File Saved... " + path);
+
+      // remove the dataURL prefix
+      const base64Data = file.data.split(",")[1];
+
+      const bufferData = Buffer.from(base64Data, "base64");
+      fs.writeFile(path, bufferData, (err) => {
+        if (err) {
+          console.error("Error saving file:", err);
+        } else {
+          console.log("File Saved... " + path);
+        }
       });
     }
-    if (recipient && text) {
+    if (recipient && (text || file)) {
       const messageDoc = await Message.create({
         sender: connection.userId,
         recipient,
         text,
+        file: file ? filename : null,
       });
 
       [...wss.clients]
@@ -221,6 +231,7 @@ wss.on("connection", (connection, req) => {
               text,
               sender: connection.userId,
               recipient,
+              file: file ? filename : null,
               _id: messageDoc._id,
             })
           )
